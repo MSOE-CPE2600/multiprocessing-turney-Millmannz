@@ -1,4 +1,7 @@
 # System Programming Lab 11 Multiprocessing
+### Zac Millmann
+### Assignment: Lab11 Multiprocessing
+### Course: CPE 2600 112
 ## Overview
 In my implementation I used the provided mandel.c file and added the multiprocessing and multi image creating functionality. I created two new fucntions inside the program: The first is `extract_prefix()` which is a simple helper fucntion to determine the beginning of the file name either provided by the user or the default in order to ease the naming of our newly created files. The second is `create_image()` which takes the steps to make the image and store it and keeps it in its own fucntion to avoid repeated code.
 ## Results
