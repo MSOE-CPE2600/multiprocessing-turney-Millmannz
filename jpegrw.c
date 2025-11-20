@@ -5,6 +5,9 @@
 //
 //  Minor changes made to some types.
 //  Compile with -ljpeg
+// Name: Zac Millmann
+// Assignment: Lab11 Multiprocessing
+// Course: CPE 2600 112
 ///
 #include <stdlib.h>
 #include <stdio.h>
