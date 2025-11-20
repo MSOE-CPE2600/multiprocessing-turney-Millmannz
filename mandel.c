@@ -24,7 +24,7 @@ static int iterations_at_point( double x, double y, int max );
 static void compute_image( imgRawImage *img, double xmin, double xmax,
 									double ymin, double ymax, int max );
 static void show_help();
-void create_image(int imageNum, const double k, double scale_start, double scale_end, double yscale, double xcenter, double ycenter, char *prefix, char *outfile);
+void create_image(int imageNum, const double k, double scale_start, double scale_end, double yscale, double xcenter, double ycenter, char *prefix, char *outfile, int max, int image_height, int image_width);
 void extract_prefix(const char *filename, char *prefix);
 
 
@@ -44,16 +44,20 @@ int main( int argc, char *argv[] )
 	// Default values
 	double ycenter = 0;
 	double yscale = 0; // calc later
+	double xscale;
+	int image_width = 1000;
+	int image_height = 1000;
+	int max = 1000;
 
 	//num images can be changed here
-	int numImg = 1000;
+	int numImg = 50;
 
 	int numeric_value = 0;
 
 	// Used to create a custom zoom function
 	const double scale_start = 2.0;
 	const double scale_end   = 0.0;
-	const double epsilon     = 0.0000000001;   
+	const double epsilon     = 0.000001;   
 	const double total_iters = (double)numImg;
 	const double k = -log(epsilon) / total_iters;
 
@@ -135,14 +139,14 @@ int main( int argc, char *argv[] )
 				 * But could use pipe in future to fix problem and improve performance
 				 */
 				for(int j = i+1; j < numImg+1; j+=num_processes){
-					create_image(j, k, scale_start, scale_end, yscale, xcenter, ycenter, prefix, outfile);
+					create_image(j, k, scale_start, scale_end, yscale, xcenter, ycenter, prefix, outfile, max, image_height, image_width);
 				}
 
 				//Handles remainders by telling some process that they must make one more image
 				//Ex. if there is 6 remainders processes 0-5 would each take an extra image
 				int remain_num = numImg - (remain-i) + 1;
 				if(i<remain){
-					create_image(remain_num, k, scale_start, scale_end, yscale, xcenter, ycenter, prefix, outfile);
+					create_image(remain_num, k, scale_start, scale_end, yscale, xcenter, ycenter, prefix, outfile, max, image_height, image_width);
 				}
 
 				exit(0); 
@@ -157,7 +161,7 @@ int main( int argc, char *argv[] )
 		else{
 			
 			extract_prefix(outfile, prefix);
-			create_image(1, k, scale_start, scale_end, yscale, xcenter, ycenter, prefix, outfile);
+			create_image(1, k, scale_start, scale_end, yscale, xcenter, ycenter, prefix, outfile, max, image_height, image_width);
 		}
 
 	return 0;
@@ -282,14 +286,14 @@ void extract_prefix(const char *filename, char *prefix) {
 
 //Copied and pasted previous code to not repeat code
 //xscale uses custom zoom fucntion to create better video
-void create_image(int imageNum, const double k, double scale_start, double scale_end, double yscale, double xcenter, double ycenter, char *prefix, char *outfile){
+void create_image(int imageNum, const double k, double scale_start, double scale_end, double yscale, double xcenter, double ycenter, char *prefix, char *outfile, int max, int image_height, int image_width){
 	double xscale = scale_end + (scale_start - scale_end) * exp(-k * imageNum);
 
 	//Stores all new images in a folder images/ and gives images custom # and
 	// name based on user input and # of images
 	sprintf(outfile, "images/%s%d.jpg", prefix, imageNum);
 
-	yscale = xscale / 1000 * 1000;
+	yscale = xscale / image_width * image_height;
 
 	// Create a raw image of the appropriate size.
 	imgRawImage* img = initRawImage(1000,1000);
@@ -298,7 +302,7 @@ void create_image(int imageNum, const double k, double scale_start, double scale
 	setImageCOLOR(img,0);
 
 	// Compute the Mandelbrot image
-	compute_image(img,xcenter-xscale/2,xcenter+xscale/2,ycenter-yscale/2,ycenter+yscale/2,1000);
+	compute_image(img,xcenter-xscale/2,xcenter+xscale/2,ycenter-yscale/2,ycenter+yscale/2,max);
 
 	// Save the image in the stated file.
 	storeJpegImageFile(img,outfile);
